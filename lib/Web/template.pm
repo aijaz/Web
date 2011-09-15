@@ -1,5 +1,5 @@
 
-package v3::template;
+package Web::template;
 
 use strict;
 use warnings;

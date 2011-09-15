@@ -1,6 +1,6 @@
 
 
-package v3::PassThrough;
+package Web::PassThrough;
 
 use strict;
 use warnings;

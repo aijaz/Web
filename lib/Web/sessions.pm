@@ -1,4 +1,4 @@
-package v3::sessions;
+package Web::sessions;
 
 use Exporter();
 @ISA = qw(Exporter);
@@ -6,11 +6,11 @@ use Exporter();
 
 use Apache::Cookie;
 use Data::Dumper;
-use v3::db;
+use Web::db;
 
 
 my $cookie_exp = '1 hr';
-my $cookie_name = 'ENoorCmsWEB';
+my $cookie_name = 'EuclidWeb';
 
 sub getCookie {
     my ($q, $name) = @_;
@@ -28,7 +28,7 @@ sub deleteSession {
 
     my $cookies_from_browser = getCookie($q, $cookie_name);
     if ($cookies_from_browser) {
-        &v3::db::deleteCookie($dbh, $cookie_from_browser);
+        &Web::db::deleteCookie($dbh, $cookie_from_browser);
     }
 }
 
@@ -59,7 +59,7 @@ sub retrieveSession {
     $cookie->bake();   # bake it right here
 
     # now read value from disk
-    my $cookie_hash = &v3::db::getCookie($dbh, $cookie_from_browser);
+    my $cookie_hash = &Web::db::getCookie($dbh, $cookie_from_browser);
     $cookie_hash->{cookie} = $cookie;
     return $cookie_hash;
 }

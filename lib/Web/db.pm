@@ -1,8 +1,39 @@
-package v3::db;
+package Web::db;
 
 use DBI;
 use Data::Dumper;
 use Date::Manip;
+
+sub new {
+    my $arg = shift;
+    my $class = (ref $arg) || $arg;
+    my $pid = $$;
+    $n++;
+    my $unique_id = join("_", time, $pid, $n);
+
+    my $self = {
+        name         => '',
+        rc           => '',                       # exit code
+        status       => 'Waiting',
+        unique_id    => $unique_id,
+        
+        params       => '',
+        
+    };
+
+    my %args = @_;
+
+    # set up any other parameters that the caller may have passed in 
+    #
+    foreach my $key (keys %args) {
+        $self->{$key} = $args{$key};
+    }
+
+    croak "No Job name specified" unless $self->{name};
+
+    bless $self, $class;
+    return $self;
+}
 
 sub getResultSet {
     my ($st, $fn, @parms) = @_;
@@ -26,21 +57,9 @@ sub getResultSet {
 
 
 sub getDbh {
-    my $dbname = 'bills';
-    my $user   = 'postgres';
-    my $pass   = 'd0v3t41l';
-    
-    $dbname    = 'gpdb';
-    $user      = 'gpuser';
-    $pass      = 'gppassword';
-
-    $dbname    = 'cms2';
-    $user      = 'cms';
-    $pass      = 'cms';
-
-    $dbname    = 'pcp';
-    $user      = 'pcp';
-    $pass      = 'pcp';
+    my $dbname    = 'pcp';
+    my $user      = 'pcp';
+    my $pass      = 'pcp';
 
     my $dbh = DBI->connect("dbi:Pg:dbname=$dbname", $user, $pass,
         {

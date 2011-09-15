@@ -1,15 +1,15 @@
 #!/usr/local/bin/perl
 
-package v3::go;
+package Web::go;
 
 use strict;
 use warnings;
 
 use Apache::Constants qw(OK REDIRECT NOT_FOUND);
 use Apache::Request;
-use v3::template;
-use v3::sessions qw (retrieveSession saveSession);
-use v3::db;
+use Web::template;
+use Web::sessions qw (retrieveSession saveSession);
+use Web::db;
 use Apache::Cookie;
 use Data::Dumper;
 use File::Basename;
@@ -28,7 +28,7 @@ sub handler {
     my $h           = $q->parms(); 
     my $ct          = ($file =~ /.xml$/) ? "application/xml" : "text/html";
     my $hash        = {};
-    my $dbh         = &v3::db::getDbh();
+    my $dbh         = &Web::db::getDbh();
     my $session     = {};
     my $headers_in  = $q->headers_in();
     my $headers_out = $q->headers_out();
@@ -65,8 +65,16 @@ sub handler {
     if ($method ne 'GET' and $method ne 'HEAD') {
         $headers_out->{"expires"} = "-1d";
     }
+    if ($method eq 'POST' && $session->{login_name}) {
+        if ($h->{auth_token} ne $session->{cookie_string}) {
+            print $query->header(-type    => "text/plain",
+                                 -expires => "-1d",
+                                 -status  => '403 Forbidden - Possible XXXX');
+            print "Possible XXXX\n";
+            return 403;
+        }
+    }
 
-    
     
     $hash = { headers_out  => $headers_out,
               http_content => undef ,
@@ -82,7 +90,7 @@ sub handler {
     };
 
     
-    my $text = &v3::template::readFile ($q, $file, $hash, $dbh, $session, $h);
+    my $text = &Web::template::readFile ($q, $file, $hash, $dbh, $session, $h);
 
 
     if (defined $hash->{REDIRECT}) {
