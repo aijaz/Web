@@ -8,7 +8,7 @@ use warnings;
 use Apache::Constants qw(OK REDIRECT NOT_FOUND);
 use Apache::Request;
 use Web::template;
-use Web::sessions qw (retrieveSession saveSession);
+use Web::sessions qw (retrieveSession);
 use Web::db;
 use Apache::Cookie;
 use Data::Dumper;
@@ -62,14 +62,18 @@ sub handler {
  #    my $resp_headers = $q->headers_out();
     my ($basename, $dir, $type) = fileparse($file, qr/\..*/);
 
-    if ($method ne 'GET' and $method ne 'HEAD') {
+    if ($method eq 'GET' || $method eq 'HEAD') {
+        $headers_out->{"expires"} = "1d";
+    }
+    else {
         $headers_out->{"expires"} = "-1d";
     }
+    
     if ($method eq 'POST' && $session->{login_name}) {
         if ($h->{auth_token} ne $session->{cookie_string}) {
-            print $query->header(-type    => "text/plain",
-                                 -expires => "-1d",
-                                 -status  => '403 Forbidden - Possible XXXX');
+            print $q->header(-type    => "text/plain",
+                             -expires => "-1d",
+                             -status  => '403 Forbidden - Possible XXXX');
             print "Possible XXXX\n";
             return 403;
         }
@@ -103,6 +107,18 @@ sub handler {
         $dbh->commit;
         $dbh->disconnect;
         return handleFile($q, $hash);
+    }
+    elsif (defined $hash->{http_status}) {
+        $q->send_http_header("text/plain");
+        if ($hash->{http_content}) {
+            print $hash->{http_content};
+        }
+        else {
+            print $text;
+        }
+        $dbh->commit;
+        $dbh->disconnect;
+        return $hash->{http_status};
     }
 
     my $status = $hash->{http_status} || OK;
