@@ -73,8 +73,8 @@ sub handler {
         if ($h->{auth_token} ne $session->{cookie_string}) {
             print $q->header(-type    => "text/plain",
                              -expires => "-1d",
-                             -status  => '403 Forbidden - Possible XXXX');
-            print "Possible XXXX\n";
+                             -status  => '403 Forbidden - Possible CSRF');
+            print "Possible CSRF\n";
             return 403;
         }
     }
